@@ -6,6 +6,8 @@ import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
     Text,
     TextInput,
     TouchableOpacity,
@@ -20,11 +22,14 @@ export default function NewRoomScreen() {
     const [description, setDescription] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const canSubmit = !isLoading && title.trim().length > 0;
+
     const handleCreate = async () => {
         if (!title.trim()) {
             Alert.alert("Помилка", "Будь ласка, введіть назву кімнати.");
             return;
         }
+        if (isLoading) return;
 
         setIsLoading(true);
         try {
@@ -32,38 +37,27 @@ export default function NewRoomScreen() {
                 title: title.trim(),
                 description: description.trim() || undefined,
             });
-            router.back();
-            router.push(`/chat/${roomId}`);
-        } catch (error) {
+            // Один перехід замість back() + push()
+            router.replace(`/chat/${roomId}`);
+        } catch (error: any) {
             console.error("Error creating room", error);
-            Alert.alert("Помилка", "Не вдалося створити кімнату.");
+            Alert.alert(
+                "Помилка",
+                `Не вдалося створити кімнату.\n\n${error?.message ?? ""}`
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <View className="flex-1 bg-surface p-6">
-            <Stack.Screen
-                options={{
-                    headerRight: () => (
-                        <TouchableOpacity
-                            onPress={handleCreate}
-                            disabled={isLoading || !title.trim()}
-                            className={`px-3 py-1.5 rounded-xl bg-primary ${isLoading || !title.trim() ? "opacity-50" : ""
-                                }`}
-                        >
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color="#FFFFFF" />
-                            ) : (
-                                <Text className="text-white text-sm font-bold">Створити</Text>
-                            )}
-                        </TouchableOpacity>
-                    ),
-                }}
-            />
+        <KeyboardAvoidingView
+            className="flex-1 bg-surface"
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+            <Stack.Screen options={{ title: "Нова кімната" }} />
 
-            <View className="gap-4 mt-2">
+            <View className="flex-1 p-6 gap-4 mt-2">
                 <View>
                     <Text className="text-textMuted text-xs font-semibold uppercase mb-2">
                         Назва кімнати *
@@ -95,7 +89,20 @@ export default function NewRoomScreen() {
                         textAlignVertical="top"
                     />
                 </View>
+
+                <TouchableOpacity
+                    onPress={handleCreate}
+                    disabled={!canSubmit}
+                    className={`mt-2 py-3.5 rounded-2xl bg-primary items-center ${canSubmit ? "" : "opacity-50"
+                        }`}
+                >
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                        <Text className="text-white text-base font-bold">Створити</Text>
+                    )}
+                </TouchableOpacity>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
