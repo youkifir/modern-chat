@@ -161,7 +161,7 @@ export const deleteMessage = mutation({
 export const generateUploadUrl = mutation(async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-        throw new Error("Unauthorized: Потрібна авторизація");
+        throw new Error("Необхідно авторизуватися");
     }
     return await ctx.storage.generateUploadUrl();
 });
@@ -209,6 +209,58 @@ export const sendMediaMessage = mutation({
 
         await ctx.db.patch(args.chatRoomId, {
             lastMessage: `${user.name ?? "Користувач"}: 📷 Фотографія`,
+            lastMessageAt: Date.now(),
+        });
+
+        return messageId;
+    },
+});
+
+/**
+ * Мутація для відправки голосового повідомлення
+ */
+export const sendAudioMessage = mutation({
+    args: {
+        chatRoomId: v.id("chatRooms"),
+        audioStorageId: v.id("_storage"),
+        audioDuration: v.number(),
+        replyToId: v.optional(v.id("messages")),
+        replyToSender: v.optional(v.string()),
+        replyToText: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new Error("Необхідно авторизуватися");
+        }
+
+        const user = await ctx.db.get(userId);
+        if (!user) {
+            throw new Error("Користувача не знайдено");
+        }
+
+        const audioUrl = await ctx.storage.getUrl(args.audioStorageId);
+        if (!audioUrl) {
+            throw new Error("Не вдалося отримати URL аудіофайлу");
+        }
+
+        const senderName = user.name ?? user.email?.split("@")[0] ?? "Користувач";
+
+        const messageId = await ctx.db.insert("messages", {
+            chatRoomId: args.chatRoomId,
+            senderId: userId,
+            senderName,
+            senderPhoto: user.image ?? undefined,
+            audioUrl,
+            audioStorageId: args.audioStorageId,
+            audioDuration: args.audioDuration,
+            replyToId: args.replyToId,
+            replyToSender: args.replyToSender,
+            replyToText: args.replyToText,
+        });
+
+        await ctx.db.patch(args.chatRoomId, {
+            lastMessage: `${senderName}: 🎤 Голосове повідомлення`,
             lastMessageAt: Date.now(),
         });
 

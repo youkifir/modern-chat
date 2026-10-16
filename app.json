@@ -33,8 +33,24 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Додатку Modern Chat потрібен доступ до вашого мікрофона для запису та надсилання голосових повідомлень."
+        }
+      ]
     ],
+    "android": {
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Додатку Modern Chat потрібен доступ до вашого мікрофона для запису та надсилання голосових повідомлень."
+      }
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
