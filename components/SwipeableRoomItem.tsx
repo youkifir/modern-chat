@@ -3,7 +3,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -102,64 +102,66 @@ export const SwipeableRoomItem: React.FC<SwipeableRoomItemProps> = ({
             </View>
 
             {/* Верхня картка кімнати, що рухається */}
-            <GestureDetector gesture={panGesture}>
-                <Animated.View style={animatedCardStyle}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (translateX.value !== 0) {
-                                resetPosition();
-                            } else {
-                                onPress();
-                            }
-                        }}
-                        activeOpacity={0.9}
-                        className="bg-secondary border border-surfaceLight rounded-2xl p-4 flex-row items-center justify-between"
-                    >
-                        <View className="flex-row items-center flex-1 mr-3">
-                            {/* Іконка чат-кімнати */}
-                            <View className="w-12 h-12 rounded-xl bg-surfaceLight items-center justify-center mr-3.5">
-                                <Ionicons name="chatbubbles" size={22} color={COLORS.primary} />
-                            </View>
-
-                            <View className="flex-1">
-                                <View className="flex-row items-center gap-1.5">
-                                    <Text className="text-white text-base font-bold flex-shrink" numberOfLines={1}>
-                                        {room.title}
-                                    </Text>
-                                    {isCreator && (
-                                        <View className="bg-primary/20 px-1.5 py-0.5 rounded">
-                                            <Text className="text-primary text-[10px] font-semibold">автор</Text>
-                                        </View>
-                                    )}
+            <GestureHandlerRootView>
+                <GestureDetector gesture={panGesture}>
+                    <Animated.View style={animatedCardStyle}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (translateX.value !== 0) {
+                                    resetPosition();
+                                } else {
+                                    onPress();
+                                }
+                            }}
+                            activeOpacity={0.9}
+                            className="bg-secondary border border-surfaceLight rounded-2xl p-4 flex-row items-center justify-between"
+                        >
+                            <View className="flex-row items-center flex-1 mr-3">
+                                {/* Іконка чат-кімнати */}
+                                <View className="w-12 h-12 rounded-xl bg-surfaceLight items-center justify-center mr-3.5">
+                                    <Ionicons name="chatbubbles" size={22} color={COLORS.primary} />
                                 </View>
 
-                                {room.lastMessage ? (
-                                    <Text className="text-textMuted text-xs mt-1" numberOfLines={1}>
-                                        {room.lastMessage}
-                                    </Text>
-                                ) : (
-                                    <Text className="text-textMuted/60 text-xs italic mt-1" numberOfLines={1}>
-                                        {room.description || "Повідомлень ще немає"}
-                                    </Text>
-                                )}
-                            </View>
-                        </View>
+                                <View className="flex-1">
+                                    <View className="flex-row items-center gap-1.5">
+                                        <Text className="text-white text-base font-bold flex-shrink" numberOfLines={1}>
+                                            {room.title}
+                                        </Text>
+                                        {isCreator && (
+                                            <View className="bg-primary/20 px-1.5 py-0.5 rounded">
+                                                <Text className="text-primary text-[10px] font-semibold">автор</Text>
+                                            </View>
+                                        )}
+                                    </View>
 
-                        {/* Час або стрілочка */}
-                        <View className="items-end">
-                            {room.lastMessageAt ? (
-                                <Text className="text-textMuted text-[10px] mb-1">
-                                    {new Date(room.lastMessageAt).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
-                                </Text>
-                            ) : null}
-                            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
-                        </View>
-                    </TouchableOpacity>
-                </Animated.View>
-            </GestureDetector>
+                                    {room.lastMessage ? (
+                                        <Text className="text-textMuted text-xs mt-1" numberOfLines={1}>
+                                            {room.lastMessage}
+                                        </Text>
+                                    ) : (
+                                        <Text className="text-textMuted/60 text-xs italic mt-1" numberOfLines={1}>
+                                            {room.description || "Повідомлень ще немає"}
+                                        </Text>
+                                    )}
+                                </View>
+                            </View>
+
+                            {/* Час або стрілочка */}
+                            <View className="items-end">
+                                {room.lastMessageAt ? (
+                                    <Text className="text-textMuted text-[10px] mb-1">
+                                        {new Date(room.lastMessageAt).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </Text>
+                                ) : null}
+                                <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+                            </View>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </GestureDetector>
+            </GestureHandlerRootView>
         </View>
     );
 };
